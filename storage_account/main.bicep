@@ -70,3 +70,7 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     minimumTlsVersion: minimumTlsVersion
   }
 }
+
+output systemAssignedPrincipalIdentity string = contains(identity, 'SystemAssigned')
+  ? storageaccount.identity.principalId
+  : ''

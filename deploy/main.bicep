@@ -18,3 +18,5 @@ module stg_module '../storage_account/main.bicep' = {
     identity: 'SystemAssigned,UserAssigned'
   }
 }
+
+output systemAssignedPrincipalIdForStorageAccount string = stg_module.outputs.systemAssignedPrincipalIdentity
