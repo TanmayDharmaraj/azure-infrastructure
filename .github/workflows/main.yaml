@@ -28,6 +28,7 @@ jobs:
           sarif_file: bicep.sarif
 
   infrastructure:
+    needs: quality_checks
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout GitHub Action'
