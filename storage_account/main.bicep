@@ -40,6 +40,9 @@ param publicNetworkAccess string = 'Enabled'
 ])
 param minimumTlsVersion string = 'TLS1_2'
 
+@description('Name of blob container to create')
+param blobContainerNames string[] = []
+
 resource userAssignedManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (contains(
   identity,
   'UserAssigned'
@@ -70,6 +73,19 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
     minimumTlsVersion: minimumTlsVersion
   }
 }
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
+  name: 'default'
+  parent: storageaccount
+}
+
+resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = [
+  for name in blobContainerNames: {
+    name: toLower(name)
+    parent: blobService
+    properties: {}
+  }
+]
 
 output systemAssignedPrincipalIdentity string = contains(identity, 'SystemAssigned')
   ? storageaccount.identity.principalId

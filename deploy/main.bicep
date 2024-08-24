@@ -16,6 +16,10 @@ module stg_module '../storage_account/main.bicep' = {
     location: location
     sku: 'Standard_LRS'
     identity: 'SystemAssigned,UserAssigned'
+    blobContainerNames: [
+      'container1'
+      'container2'
+    ]
   }
 }
 
