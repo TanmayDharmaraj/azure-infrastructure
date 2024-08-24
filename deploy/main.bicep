@@ -1,10 +1,20 @@
 targetScope = 'subscription'
 
-module rg_module '../resource_group/main.bicep' = {
-  scope: subscription()
-  name: 'resource_group'
+var prefix = 'sampleInfra'
+var location = 'westeurope'
+
+resource resource_group 'Microsoft.Resources/resourceGroups@2024-03-01' = {
+  name: '${prefix}_rg'
+  location: location
+}
+
+module stg_module '../storage_account/main.bicep' = {
+  name: 'module_storage'
+  scope: resource_group
   params: {
-    name: 'sampleInfra'
-    location: 'westeurope'
+    prefix: prefix
+    location: location
+    sku: 'Standard_LRS'
+    identity: 'SystemAssigned,UserAssigned'
   }
 }
