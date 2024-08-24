@@ -31,6 +31,15 @@ param identity string = 'None'
 ])
 param publicNetworkAccess string = 'Enabled'
 
+@description('Minimum TLS version support')
+@allowed([
+  'TLS1_0'
+  'TLS1_1'
+  'TLS1_2'
+  'TLS1_3'
+])
+param minimumTlsVersion string = 'TLS1_2'
+
 resource userAssignedManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (contains(
   identity,
   'UserAssigned'
@@ -58,5 +67,6 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
           }
   properties: {
     publicNetworkAccess: publicNetworkAccess
+    minimumTlsVersion: minimumTlsVersion
   }
 }
