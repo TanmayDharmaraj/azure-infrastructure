@@ -24,6 +24,13 @@ param sku string = 'Standard_LRS'
 ])
 param identity string = 'None'
 
+@description('Allow or disallow public network access')
+@allowed([
+  'Disabled'
+  'Enabled'
+])
+param publicNetworkAccess string = 'Enabled'
+
 resource userAssignedManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (contains(
   identity,
   'UserAssigned'
@@ -49,5 +56,7 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
               ? {}
               : { '${userAssignedManagedIdentity.id}': {} }
           }
-  properties: {}
+  properties: {
+    publicNetworkAccess: publicNetworkAccess
+  }
 }
