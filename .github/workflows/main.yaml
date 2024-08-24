@@ -5,7 +5,28 @@ name: azure-infrastructure-cd
 permissions:
   id-token: write
   contents: read
+  security-events: write
 jobs:
+  quality_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout GitHub Action'
+        uses: actions/checkout@main
+
+      - name: Lint Bicep
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az bicep install
+            az bicep lint --file ./deploy/main.bicep --diagnostics-format sarif > bicep.sarif
+
+      - name: Upload SARIF
+        if: (success() || failure())
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          category: bicep
+          sarif_file: bicep.sarif
+
   infrastructure:
     runs-on: ubuntu-latest
     steps:
@@ -23,6 +44,5 @@ jobs:
         uses: azure/arm-deploy@v2
         with:
           scope: 'subscription'
-          template: './resource_group/main.bicep'
+          template: './deploy/main.bicep'
           region: 'westeurope'
-          parameters: name=sampleInfra
