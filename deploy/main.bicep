@@ -37,12 +37,22 @@ module diagnosticEventHub '../event_hub/main.bicep' = {
   }
 }
 
-// Storage
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: '${prefix}_rg'
   location: location
 }
 
+// Key vault (used for CMK)
+module keyVault '../key_vault/main.bicep' = {
+  scope: resourceGroup
+  name: 'module_key_vault'
+  params: {
+    prefix: prefix
+    location: location
+  }
+}
+
+// Storage
 module stg_module '../storage_account/main.bicep' = {
   name: 'module_storage'
   scope: resourceGroup
