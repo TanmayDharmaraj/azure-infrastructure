@@ -74,18 +74,13 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   }
 }
 
-resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
-  name: 'default'
-  parent: storageaccount
-}
-
-resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = [
-  for name in blobContainerNames: {
-    name: toLower(name)
-    parent: blobService
-    properties: {}
+module containers 'containers.bicep' = {
+  name: 'module_containers'
+  params: {
+    blobConatinerNames: blobContainerNames
+    storageAccountName: storageaccount.name
   }
-]
+}
 
 output systemAssignedPrincipalIdentity string = contains(identity, 'SystemAssigned')
   ? storageaccount.identity.principalId
