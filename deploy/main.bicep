@@ -1,46 +1,48 @@
 targetScope = 'subscription'
 
 var prefix = 'sample'
+var diagnosticResourceGroupPrefix = 'diag'
 var location = 'westeurope'
-var diagnosticResourceGroupName = 'diag_rg'
-var eventhubNamespaceName = 'diagns'
-var eventhubNamespaceEventHubName = 'diagnostics'
-var logAnalyticsWorkspaceName = 'diaglaw'
-var diagnosticStorageAccountName = 'diagstgulwyeojxn54f2'
 
+resource diagnosticResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
+  name: '${diagnosticResourceGroupPrefix}_rg'
+  location: location
+}
+
+module diagnosticStorageAccount '../storage_account/main.bicep' = {
+  name: 'module_diagnostic_storage'
+  scope: diagnosticResourceGroup
+  params: {
+    prefix: diagnosticResourceGroupPrefix
+    location: location
+    sku: 'Standard_LRS'
+  }
+}
+
+module diagnosticLogAnalyticsAgent '../log_analytics_workspace/main.bicep' = {
+  name: 'module_diagnostic_log_analytics_agent'
+  scope: diagnosticResourceGroup
+  params: {
+    location: location
+    prefix: diagnosticResourceGroupPrefix
+  }
+}
+
+module diagnosticEventHub '../event_hub/main.bicep' = {
+  scope: diagnosticResourceGroup
+  name: 'module_diagnostic_event_hub'
+  params: {
+    location: location
+    prefix: diagnosticResourceGroupPrefix
+  }
+}
+
+// Storage
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: '${prefix}_rg'
   location: location
 }
 
-resource diagnosticResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' existing = {
-  name: diagnosticResourceGroupName
-}
-
-resource eventHubNamespace 'Microsoft.EventHub/namespaces@2024-01-01' existing = {
-  name: eventhubNamespaceName
-  scope: diagnosticResourceGroup
-}
-
-resource eventHubName 'Microsoft.EventHub/namespaces/eventhubs@2024-01-01' existing = {
-  name: eventhubNamespaceEventHubName
-  parent: eventHubNamespace
-}
-
-resource eventHubAuthorizationRule 'Microsoft.EventHub/namespaces/authorizationRules@2024-01-01' existing = {
-  name: 'RootManageSharedAccessKey'
-  parent: eventHubNamespace
-}
-
-resource logAnalyticsResource 'Microsoft.OperationalInsights/workspaces@2020-10-01' existing = {
-  name: logAnalyticsWorkspaceName
-  scope: diagnosticResourceGroup
-}
-
-resource diagnosticStorageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
-  name: diagnosticStorageAccountName
-  scope: diagnosticResourceGroup
-}
 module stg_module '../storage_account/main.bicep' = {
   name: 'module_storage'
   scope: resourceGroup
@@ -57,22 +59,22 @@ module stg_module '../storage_account/main.bicep' = {
       {
         name: 'diagnostic_setting'
         eventHub: {
-          name: eventHubName.name
-          authorizationRuleResourceId: eventHubAuthorizationRule.id
+          name: diagnosticEventHub.outputs.eventHubName
+          authorizationRuleResourceId: diagnosticEventHub.outputs.authorizationRule
         }
-        workspaceResourceId: logAnalyticsResource.id
-        storageAccountResourceId: diagnosticStorageAccount.id
+        workspaceResourceId: diagnosticLogAnalyticsAgent.outputs.logAnalyticsWorkspaceId
+        storageAccountResourceId: diagnosticStorageAccount.outputs.storageAccountId
       }
     ]
     blobServiceDiagnosticSettings: [
       {
         name: 'blob_service_diagnostic_metric_setting'
         eventHub: {
-          name: eventHubName.name
-          authorizationRuleResourceId: eventHubAuthorizationRule.id
+          name: diagnosticEventHub.outputs.eventHubName
+          authorizationRuleResourceId: diagnosticEventHub.outputs.authorizationRule
         }
-        workspaceResourceId: logAnalyticsResource.id
-        storageAccountResourceId: diagnosticStorageAccount.id
+        workspaceResourceId: diagnosticLogAnalyticsAgent.outputs.logAnalyticsWorkspaceId
+        storageAccountResourceId: diagnosticStorageAccount.outputs.storageAccountId
         logCategories: [
           {
             categoryGroup: 'allLogs'

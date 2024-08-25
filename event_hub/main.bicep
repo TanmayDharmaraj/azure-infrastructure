@@ -27,3 +27,12 @@ resource eventHub 'Microsoft.EventHub/namespaces/eventhubs@2024-01-01' = {
     messageRetentionInDays: eventHubSku == 'Basic' ? 1 : 7
   }
 }
+
+resource eventHubAuthorizationRule 'Microsoft.EventHub/namespaces/authorizationRules@2024-01-01' existing = {
+  name: 'RootManageSharedAccessKey'
+  parent: eventHubNamespace
+}
+
+output eventHubNamespaceName string = eventHubNamespace.name
+output eventHubName string = eventHub.name
+output authorizationRule string = eventHubAuthorizationRule.id

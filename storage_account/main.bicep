@@ -180,3 +180,4 @@ type eventHubDiagnosticSettingType = {
 output systemAssignedPrincipalIdentity string = contains(identity, 'SystemAssigned')
   ? storageaccount.identity.principalId
   : ''
+output storageAccountId string = storageaccount.id
