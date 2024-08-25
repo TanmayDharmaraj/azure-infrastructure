@@ -30,3 +30,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
 
 @description('The resource id of the provisioned key vault')
 output keyVaultResourceId string = keyVault.id
+
+@description('The name of the provisioned key vault')
+output keyVaultName string = keyVault.name
