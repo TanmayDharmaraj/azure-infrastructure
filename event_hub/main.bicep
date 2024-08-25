@@ -1,8 +1,12 @@
+@description('[Required] Prefix to be used for event hub resources')
 @minLength(4)
 @maxLength(48)
 param prefix string
+
+@description('[Required] Location to deploy the resource to')
 param location string
-@description('Specifies the messaging tier for Event Hub Namespace.')
+
+@description('[Optional] Specifies the messaging tier for Event Hub Namespace. Defaults to `Basic`')
 @allowed([
   'Basic'
   'Standard'
@@ -33,6 +37,11 @@ resource eventHubAuthorizationRule 'Microsoft.EventHub/namespaces/authorizationR
   parent: eventHubNamespace
 }
 
+@description('Namespace of the event hub that was created')
 output eventHubNamespaceName string = eventHubNamespace.name
+
+@description('Name of the event hub that was created')
 output eventHubName string = eventHub.name
+
+@description('Resource id of the default `RootManageSharedAccessKey` authorization rule')
 output authorizationRule string = eventHubAuthorizationRule.id

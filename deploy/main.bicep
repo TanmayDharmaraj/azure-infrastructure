@@ -86,4 +86,4 @@ module stg_module '../storage_account/main.bicep' = {
   }
 }
 
-output systemAssignedPrincipalIdForStorageAccount string = stg_module.outputs.systemAssignedPrincipalIdentity
+output systemAssignedPrincipalIdForStorageAccount string? = stg_module.outputs.systemAssignedPrincipalIdentity

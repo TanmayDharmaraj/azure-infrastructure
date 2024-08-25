@@ -177,7 +177,11 @@ type eventHubDiagnosticSettingType = {
 }
 
 // Outputs
-output systemAssignedPrincipalIdentity string = contains(identity, 'SystemAssigned')
+
+@description('Principal id of the system assigned identity if one was created. Results in `null` if skipped provisioning by user')
+output systemAssignedPrincipalIdentity string? = contains(identity, 'SystemAssigned')
   ? storageaccount.identity.principalId
-  : ''
+  : null
+
+@description('Resource id of the storage account that was created')
 output storageAccountId string = storageaccount.id
