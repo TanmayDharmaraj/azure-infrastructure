@@ -33,3 +33,6 @@ output keyVaultResourceId string = keyVault.id
 
 @description('The name of the provisioned key vault')
 output keyVaultName string = keyVault.name
+
+@description('The URI of the provisioned key vault')
+output keyVaultUri string = keyVault.properties.vaultUri
