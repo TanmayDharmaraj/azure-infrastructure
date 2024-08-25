@@ -81,16 +81,6 @@ resource userAssignedManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIden
   location: location
 }
 
-// Containers
-
-module containers 'containers.bicep' = {
-  name: 'module_containers'
-  params: {
-    blobConatinerNames: blobContainerNames
-    storageAccountName: storageaccount.name
-  }
-}
-
 // Diagnostic Configuration
 
 resource storageAccount_diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [
@@ -113,38 +103,16 @@ resource storageAccount_diagnosticSettings 'Microsoft.Insights/diagnosticSetting
   }
 ]
 
-// [Blob] Logging Configuration
-resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
-  name: 'default'
-  parent: storageaccount
-  properties: {}
-}
+// Blob service configuration
 
-resource blobServiceLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = [
-  for (diagnosticSetting, index) in (blobServiceDiagnosticSettings ?? []): {
-    name: diagnosticSetting.?name ?? '${storageaccount.name}-diagnosticSettings'
-    properties: {
-      storageAccountId: diagnosticSetting.?storageAccountResourceId
-      workspaceId: diagnosticSetting.?workspaceResourceId
-      eventHubName: diagnosticSetting.?eventHub.?name
-      eventHubAuthorizationRuleId: diagnosticSetting.?eventHub.?authorizationRuleResourceId
-      metrics: [
-        for group in (diagnosticSetting.?metricCategories ?? [{ category: 'AllMetrics' }]): {
-          category: group.category
-          enabled: group.?enabled ?? true
-          timeGrain: null
-        }
-      ]
-      logs: [
-        for log in (diagnosticSetting.?logCategories ?? []): {
-          categoryGroup: log.categoryGroup
-          enabled: log.?enabled ?? true
-        }
-      ]
-    }
-    scope: blobService
+module containers 'blob_service.bicep' = {
+  name: 'module_containers'
+  params: {
+    storageAccountName: storageaccount.name
+    blobConatinerNames: blobContainerNames
+    blobServiceDiagnosticSettings: blobServiceDiagnosticSettings
   }
-]
+}
 
 // Custom types
 
