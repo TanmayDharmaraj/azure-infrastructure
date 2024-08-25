@@ -44,3 +44,6 @@ resource key 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
     }
   }
 }
+
+@description('The name of the key that was created')
+output keyName string = key.name
