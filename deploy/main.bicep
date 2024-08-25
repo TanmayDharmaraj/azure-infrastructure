@@ -65,6 +65,16 @@ module storageEncryptionKey '../key_vault_key/main.bicep' = {
   }
 }
 
+// principal id
+module managed_identity '../managed_identity/main.bicep' = {
+  name: 'module_managed_identity'
+  scope: resourceGroup
+  params: {
+    prefix: prefix
+    location: location
+  }
+}
+
 // Storage
 module stg_module '../storage_account/main.bicep' = {
   name: 'module_storage'
@@ -74,6 +84,13 @@ module stg_module '../storage_account/main.bicep' = {
     location: location
     sku: 'Standard_LRS'
     identity: 'SystemAssigned,UserAssigned'
+    customerManagedKey: {
+      keyVaultResourceGroupName: resourceGroup.name
+      keyVaultName: keyVault.outputs.keyVaultName
+      keyName: storageEncryptionKey.outputs.keyName
+      keyVaultUri: keyVault.outputs.keyVaultUri
+      userAssignedIdentityResourceId: managed_identity.outputs.id
+    }
     blobContainerNames: [
       'container1'
       'container2'

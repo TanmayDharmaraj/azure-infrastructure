@@ -48,6 +48,11 @@ param diagnosticSettings storageDiagnosticSettingType
 @description('[Optional] The diagnostic settings of the blob service.')
 param blobServiceDiagnosticSettings storageSubServiceDiagnosticSettingType
 
+@description('[Optional] The customer managed encryption key configuration for the storage account.')
+param customerManagedKey customerManagedKeyType
+
+param userAssignedIdentityResourceId string?
+
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: toLower('${prefix}stg${uniqueString(resourceGroup().id)}')
   location: location
@@ -68,6 +73,59 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   properties: {
     publicNetworkAccess: publicNetworkAccess
     minimumTlsVersion: minimumTlsVersion
+    encryption: {
+      keySource: !empty(customerManagedKey) ? 'Microsoft.Keyvault' : 'Microsoft.Storage'
+      services: {
+        blob: {
+          enabled: true
+        }
+        file: {
+          enabled: true
+        }
+      }
+      keyvaultproperties: !empty(customerManagedKey)
+        ? {
+            keyname: customerManagedKey!.keyName
+            keyvaulturi: customerManagedKey!.keyVaultUri
+            keyversion: '16f4adc608ca472cab597d41160a611f'
+          }
+        : null
+      identity: !empty(userAssignedManagedIdentity.id) && contains(identity, 'UserAssigned')
+        ? {
+            userAssignedIdentity: userAssignedManagedIdentity.id
+          }
+        : null
+    }
+  }
+  dependsOn: [
+    roleAssignment
+  ]
+}
+
+// Encryption Key
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = if (!empty(customerManagedKey) && !empty(customerManagedKey.?keyVaultName)) {
+  name: customerManagedKey.?keyVaultName! ?? 'unkown'
+  scope: empty(customerManagedKey.?keyVaultResourceGroupName)
+    ? resourceGroup(customerManagedKey.?keyVaultResourceGroupName!)
+    : resourceGroup()
+}
+
+resource roleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  name: 'e147488a-f6f5-4113-8e2d-b22465e65bf6' // Key Vault Crypto Service Encryption User
+  scope: subscription()
+}
+
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(customerManagedKey) && contains(
+  identity,
+  'UserAssigned'
+)) {
+  name: guid(userAssignedManagedIdentity.id)
+  scope: keyVault
+  properties: {
+    principalId: userAssignedManagedIdentity.properties.principalId
+    roleDefinitionId: roleDefinition.id
+    principalType: 'ServicePrincipal'
   }
 }
 
@@ -175,6 +233,23 @@ type eventHubDiagnosticSettingType = {
   @description('[Required] Resource ID of the diagnostic event hub authorization rule for the Event Hubs namespace in which the event hub should be created or streamed to.')
   authorizationRuleResourceId: string
 }
+
+type customerManagedKeyType = {
+  @description('[Required] The name of a key vault for customer managed key.')
+  keyVaultName: string
+
+  @description('[Optional] The name of a resource group of the key vault if located in a different resource group than the storage account.')
+  keyVaultResourceGroupName: string?
+
+  @description('[Required] The URI of a key vault for customer managed key.')
+  keyVaultUri: string
+
+  @description('[Required] The name of the key used for encryption.')
+  keyName: string
+
+  @description('[Optional] User assigned identity to use when fetching the customer managed key. If used must also be specified in `managedIdentities.userAssignedResourceIds`. Required if no system assigned identity is available for use.')
+  userAssignedIdentityResourceId: string?
+}?
 
 // Outputs
 
