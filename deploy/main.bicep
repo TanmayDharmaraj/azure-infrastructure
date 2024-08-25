@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 
-var prefix = 'sampleInfra'
+var prefix = 'sample'
 var location = 'westeurope'
 
 resource resource_group 'Microsoft.Resources/resourceGroups@2024-03-01' = {

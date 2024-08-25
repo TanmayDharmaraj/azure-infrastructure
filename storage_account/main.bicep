@@ -1,6 +1,5 @@
 @description('The prefix for the storage account and related resources')
-@minLength(3)
-@maxLength(21)
+@maxLength(8)
 param prefix string
 
 @description('The azure location of the storage resource')
@@ -52,7 +51,7 @@ resource userAssignedManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIden
 }
 
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
-  name: toLower('${prefix}stg')
+  name: toLower('${prefix}stg${uniqueString(resourceGroup().id)}')
   location: location
   kind: 'StorageV2'
   sku: {

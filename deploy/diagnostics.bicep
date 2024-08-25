@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 
-var prefix = 'diagnosticsinfra'
+var prefix = 'diag'
 var location = 'westeurope'
 
 resource resource_group 'Microsoft.Resources/resourceGroups@2024-03-01' = {
