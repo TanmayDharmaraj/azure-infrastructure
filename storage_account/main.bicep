@@ -1,4 +1,4 @@
-import { storageDiagnosticSettingType, storageSubServiceDiagnosticSettingType } from 'types.bicep'
+import { storageDiagnosticSettingType, storageSubServiceDiagnosticSettingType, networkAccessType } from 'types.bicep'
 
 @description('[Required] The prefix for the storage account and related resources')
 @maxLength(8)
@@ -50,6 +50,9 @@ param diagnosticSettings storageDiagnosticSettingType
 @description('[Optional] The diagnostic settings of the blob service.')
 param blobServiceDiagnosticSettings storageSubServiceDiagnosticSettingType
 
+@description('[Optional] Public network access configuration')
+param networkAccess networkAccessType?
+
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: toLower('${prefix}stg${uniqueString(resourceGroup().id)}')
   location: location
@@ -70,6 +73,14 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   properties: {
     publicNetworkAccess: publicNetworkAccess
     minimumTlsVersion: minimumTlsVersion
+    networkAcls: !empty(networkAccess)
+      ? {
+          defaultAction: networkAccess.?defaultAction ?? 'Allow'
+          bypass: !empty(networkAccess.?bypass) ? networkAccess.?bypass : 'AzureServices'
+          ipRules: networkAccess.?ipRules
+          virtualNetworkRules: networkAccess.?virtualNetworkRules
+        }
+      : { defaultAction: 'Allow', bypass: 'AzureServices' }
   }
 }
 

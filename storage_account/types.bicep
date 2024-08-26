@@ -52,10 +52,50 @@ type storageSubServiceDiagnosticSettingType = {
   eventHub: eventHubDiagnosticSettingType?
 }[]?
 
+@export()
 type eventHubDiagnosticSettingType = {
   @description('[Required] Name of the diagnostic event hub within the namespace to which logs are streamed. Without this, an event hub is created for each log category.')
   name: string
 
   @description('[Required] Resource ID of the diagnostic event hub authorization rule for the Event Hubs namespace in which the event hub should be created or streamed to.')
   authorizationRuleResourceId: string
+}
+
+@export()
+type networkAccessType = {
+  @description('[Optional] Enable or disable public network access. Default is `Allow`')
+  defaultAction: 'Allow' | 'Deny'?
+
+  @description('[Optional] IP Addresses to be applied.')
+  ipRules: ipRuleType[]?
+
+  @description('[Optional] Services to bypass')
+  bypass:
+    | 'AzureServices'
+    | 'Logging'
+    | 'Metrics'
+    | 'AzureServices, Logging'
+    | 'AzureServices, Metrics'
+    | 'AzureServices, Logging, Metrics'
+    | 'Logging, Metrics'
+    | 'None'?
+
+  @description('[Optional] The virtual network rules for the resource')
+  virtualNetworkRules: virtualNetworkRuleType[]?
+}
+
+@export()
+type ipRuleType = {
+  @description('[Optional] value of the ip rule')
+  value: string
+
+  action: 'Allow'
+}
+
+@export()
+type virtualNetworkRuleType = {
+  @description('[Optional] The resource id of the virtual network')
+  id: string
+
+  action: 'Allow'
 }

@@ -106,7 +106,25 @@ module stg_module '../storage_account/main.bicep' = {
         ]
       }
     ]
+    publicNetworkAccess: 'Enabled'
+    networkAccess: {
+      bypass: 'AzureServices, Logging'
+      defaultAction: 'Allow'
+      ipRules: [
+        {
+          value: '192.168.1.1'
+          action: 'Allow'
+        }
+      ]
+      virtualNetworkRules: [
+        {
+          id: '/subscriptions/${subscription().id}/resourceGroups/tst1_rg/providers/Microsoft.Network/virtualNetworks/sample_virtual_network/subnets/default'
+          action: 'Allow'
+        }
+      ]
+    }
   }
 }
 
+@description('The principal id of the system assigned identity of the storage account. Can result in null if provisioning of system assigned identity was skipped')
 output systemAssignedPrincipalIdForStorageAccount string? = stg_module.outputs.systemAssignedPrincipalIdentity
