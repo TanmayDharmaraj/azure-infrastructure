@@ -14,7 +14,7 @@ module diagnosticStorageAccount '../storage_account/main.bicep' = {
   scope: diagnosticResourceGroup
   params: {
     prefix: diagnosticResourceGroupPrefix
-    location: location
+    location: diagnosticResourceGroup.location
     sku: 'Standard_LRS'
   }
 }
@@ -23,7 +23,7 @@ module diagnosticLogAnalyticsAgent '../log_analytics_workspace/main.bicep' = {
   name: 'module_diagnostic_log_analytics_agent'
   scope: diagnosticResourceGroup
   params: {
-    location: location
+    location: diagnosticResourceGroup.location
     prefix: diagnosticResourceGroupPrefix
   }
 }
@@ -32,7 +32,7 @@ module diagnosticEventHub '../event_hub/main.bicep' = {
   scope: diagnosticResourceGroup
   name: 'module_diagnostic_event_hub'
   params: {
-    location: location
+    location: diagnosticResourceGroup.location
     prefix: diagnosticResourceGroupPrefix
   }
 }
@@ -48,7 +48,7 @@ module keyVault '../key_vault/main.bicep' = {
   name: 'module_key_vault'
   params: {
     prefix: prefix
-    location: location
+    location: resourceGroup.location
   }
 }
 
@@ -71,7 +71,7 @@ module stg_module '../storage_account/main.bicep' = {
   scope: resourceGroup
   params: {
     prefix: prefix
-    location: location
+    location: resourceGroup.location
     sku: 'Standard_LRS'
     identity: 'SystemAssigned,UserAssigned'
     blobContainerNames: [
