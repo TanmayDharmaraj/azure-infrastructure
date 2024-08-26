@@ -1,18 +1,16 @@
 targetScope = 'subscription'
 
-@description('Specified the prefix used to create resources')
-param prefix string = 'sample'
+@description('[Required] Specified the prefix used to create resources')
+param storageResourceGroupPrefix string
 
-@description('Specified the prefix used to create diagnostic resources')
-param diagnosticResourceGroupPrefix string = 'diag'
+@description('[Required] Specified the prefix used to create diagnostic resources')
+param diagnosticResourceGroupPrefix string
 
 @description('[Optional] Specify the deployment location. Defaults to West Eurpoe if skipped')
 param location string = 'westeurope'
 
-@description('Specify the tags for the resource group. All resources created will additionally inherit the resource group tags if available.')
-param tags object = {
-  tag1: 'value1'
-}
+@description('[Optional] Specify the tags for the resource group. All resources created will additionally inherit the resource group tags if available.')
+param tags object = {}
 
 resource diagnosticResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: '${diagnosticResourceGroupPrefix}_rg'
@@ -52,7 +50,7 @@ module diagnosticEventHub '../event_hub/main.bicep' = {
 }
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
-  name: '${prefix}_rg'
+  name: '${storageResourceGroupPrefix}_rg'
   location: location
   tags: tags
 }
@@ -62,7 +60,7 @@ module keyVault '../key_vault/main.bicep' = {
   scope: resourceGroup
   name: 'module_key_vault'
   params: {
-    prefix: prefix
+    prefix: storageResourceGroupPrefix
     location: resourceGroup.location
   }
 }
@@ -85,7 +83,7 @@ module stg_module '../storage_account/main.bicep' = {
   name: 'module_storage'
   scope: resourceGroup
   params: {
-    prefix: prefix
+    prefix: storageResourceGroupPrefix
     location: resourceGroup.location
     sku: 'Standard_LRS'
     identity: 'SystemAssigned,UserAssigned'
