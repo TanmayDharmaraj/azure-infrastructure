@@ -14,9 +14,13 @@ param location string
 ])
 param eventHubSku string = 'Basic'
 
+@description('[Optional] The tags for the resource')
+param tags object?
+
 resource eventHubNamespace 'Microsoft.EventHub/namespaces@2024-01-01' = {
   name: '${prefix}ns'
   location: location
+  tags: union(tags ?? {}, resourceGroup().tags)
   sku: {
     name: eventHubSku
     tier: eventHubSku

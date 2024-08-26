@@ -53,6 +53,9 @@ param blobServiceDiagnosticSettings storageSubServiceDiagnosticSettingType
 @description('[Optional] Public network access configuration')
 param networkAccess networkAccessType?
 
+@description('[Optional] The tags for the resource')
+param tags object?
+
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: toLower('${prefix}stg${uniqueString(resourceGroup().id)}')
   location: location
@@ -60,6 +63,7 @@ resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   sku: {
     name: sku
   }
+  tags: union(tags ?? {}, resourceGroup().tags)
   identity: identity == 'None'
     ? null
     : identity == 'SystemAssigned'
@@ -92,6 +96,7 @@ resource userAssignedManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIden
 )) {
   name: '${prefix}_identity'
   location: location
+  tags: tags
 }
 
 // Diagnostic Configuration

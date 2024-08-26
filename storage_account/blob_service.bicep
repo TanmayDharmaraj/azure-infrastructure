@@ -9,6 +9,9 @@ param blobConatinerNames string[] = []
 @description('[Optional] The diagnostic settings of the blob service.')
 param blobServiceDiagnosticSettings storageSubServiceDiagnosticSettingType
 
+@description('[Optional] The metadata tags for the resource')
+param metadata object?
+
 resource storageaccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: storageAccountName
 }
@@ -22,7 +25,9 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   for name in blobConatinerNames: {
     name: toLower(name)
     parent: blobService
-    properties: {}
+    properties: {
+      metadata: union(metadata ?? {}, storageaccount.tags)
+    }
   }
 ]
 

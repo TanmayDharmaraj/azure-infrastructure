@@ -1,12 +1,23 @@
 targetScope = 'subscription'
 
-var prefix = 'sample'
-var diagnosticResourceGroupPrefix = 'diag'
-var location = 'westeurope'
+@description('Specified the prefix used to create resources')
+param prefix string = 'sample'
+
+@description('Specified the prefix used to create diagnostic resources')
+param diagnosticResourceGroupPrefix string = 'diag'
+
+@description('[Optional] Specify the deployment location. Defaults to West Eurpoe if skipped')
+param location string = 'westeurope'
+
+@description('Specify the tags for the resource group. All resources created will additionally inherit the resource group tags if available.')
+param tags object = {
+  tag1: 'value1'
+}
 
 resource diagnosticResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: '${diagnosticResourceGroupPrefix}_rg'
   location: location
+  tags: tags
 }
 
 module diagnosticStorageAccount '../storage_account/main.bicep' = {
@@ -16,6 +27,9 @@ module diagnosticStorageAccount '../storage_account/main.bicep' = {
     prefix: diagnosticResourceGroupPrefix
     location: diagnosticResourceGroup.location
     sku: 'Standard_LRS'
+    tags: {
+      used_for: 'diagnostics'
+    }
   }
 }
 
@@ -40,6 +54,7 @@ module diagnosticEventHub '../event_hub/main.bicep' = {
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: '${prefix}_rg'
   location: location
+  tags: tags
 }
 
 // Key vault (used for CMK)
@@ -74,6 +89,9 @@ module stg_module '../storage_account/main.bicep' = {
     location: resourceGroup.location
     sku: 'Standard_LRS'
     identity: 'SystemAssigned,UserAssigned'
+    tags: {
+      storageTag: 'storage_tag'
+    }
     blobContainerNames: [
       'container1'
       'container2'

@@ -12,9 +12,13 @@ param location string
 ])
 param sku string = 'standard'
 
+@description('[Optional] The tags for the resource')
+param tags object?
+
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: toLower('${prefix}-${uniqueString(resourceGroup().id)}-kv')
   location: location
+  tags: union(tags ?? {}, resourceGroup().tags)
   properties: {
     sku: {
       name: sku
