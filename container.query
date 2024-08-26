@@ -1,0 +1,3 @@
+ContainerRegistryLoginEvents
+| where TimeGenerated >= ago(15m) and OperationName == "Login" and ResultDescription == 401
+| summarize Count=count() by Identity
