@@ -18,7 +18,7 @@ jobs:
         with:
           inlineScript: |
             az bicep install
-            az bicep lint --file ./deploy/main.bicep --diagnostics-format sarif > bicep.sarif
+            az bicep lint --file main.bicep --diagnostics-format sarif > bicep.sarif
 
       - name: Upload SARIF
         if: (success() || failure())
@@ -45,8 +45,8 @@ jobs:
         uses: azure/arm-deploy@v2
         with:
           scope: 'subscription'
-          template: './deploy/main.bicep'
-          parameters: './deploy/main.bicepparam'
+          template: 'main.bicep'
+          parameters: 'main.bicepparam'
           deploymentMode: Validate
           region: 'westeurope'
 
@@ -55,6 +55,6 @@ jobs:
         uses: azure/arm-deploy@v2
         with:
           scope: 'subscription'
-          template: './deploy/main.bicep'
-          parameters: './deploy/main.bicepparam'
+          template: 'main.bicep'
+          parameters: 'main.bicepparam'
           region: 'westeurope'

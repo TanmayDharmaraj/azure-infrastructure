@@ -18,7 +18,7 @@ resource diagnosticResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01'
   tags: tags
 }
 
-module diagnosticStorageAccount '../storage_account/main.bicep' = {
+module diagnosticStorageAccount 'modules/storage_account/main.bicep' = {
   name: 'module_diagnostic_storage'
   scope: diagnosticResourceGroup
   params: {
@@ -31,7 +31,7 @@ module diagnosticStorageAccount '../storage_account/main.bicep' = {
   }
 }
 
-module diagnosticLogAnalyticsAgent '../log_analytics_workspace/main.bicep' = {
+module diagnosticLogAnalyticsAgent 'modules/log_analytics_workspace/main.bicep' = {
   name: 'module_diagnostic_log_analytics_agent'
   scope: diagnosticResourceGroup
   params: {
@@ -40,7 +40,7 @@ module diagnosticLogAnalyticsAgent '../log_analytics_workspace/main.bicep' = {
   }
 }
 
-module diagnosticEventHub '../event_hub/main.bicep' = {
+module diagnosticEventHub 'modules/event_hub/main.bicep' = {
   scope: diagnosticResourceGroup
   name: 'module_diagnostic_event_hub'
   params: {
@@ -56,7 +56,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 }
 
 // Key vault (used for CMK)
-module keyVault '../key_vault/main.bicep' = {
+module keyVault 'modules/key_vault/main.bicep' = {
   scope: resourceGroup
   name: 'module_key_vault'
   params: {
@@ -65,7 +65,7 @@ module keyVault '../key_vault/main.bicep' = {
   }
 }
 
-module storageEncryptionKey '../key_vault_key/main.bicep' = {
+module storageEncryptionKey 'modules/key_vault_key/main.bicep' = {
   scope: resourceGroup
   name: 'module_key_vault_key'
   params: {
@@ -79,7 +79,7 @@ module storageEncryptionKey '../key_vault_key/main.bicep' = {
 }
 
 // Storage
-module stg_module '../storage_account/main.bicep' = {
+module stg_module 'modules/storage_account/main.bicep' = {
   name: 'module_storage'
   scope: resourceGroup
   params: {
